@@ -506,7 +506,7 @@ function Main() {
   # add custom flag file, enroll secret and tls certificate and an empty .conf file
   $flagfile = Join-Path $scriptPath 'custom_config\osquery.flags'
   $enrollSecret = Join-Path $scriptPath 'custom_config\enroll_secret'
-  $tlsCertificate = Join-Path $scriptPath 'custom_config\cert.pem'
+  $tlsCertificate = Join-Path $scriptPath 'custom_config\tls-server-certs.pem'
   $configfile = Join-Path $scriptPath 'custom_config\osquery.conf'
 
   if ((-not (Test-Path $shell)) -or (-not (Test-Path $daemon))) {
