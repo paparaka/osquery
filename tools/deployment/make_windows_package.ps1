@@ -15,7 +15,7 @@ param(
   [bool] $help = $false
 )
 
-# The WiX Toolest is not in the PATH by default 
+# The WiX Toolest is not in the PATH by default
 $env:Path += ";C:\Program Files (x86)\WiX Toolset v3.10\bin"
 
 # Import the osquery utility functions
@@ -33,6 +33,8 @@ function New-MsiPackage() {
     [string] $packsPath = $(Join-Path $(Get-Location) 'packs'),
     [string] $certsPath = '',
     [string] $flagsPath = '',
+    [string] $enrollSecretPath = '',
+    [string] $tlsCertificatePath = '',
     [string] $shell = 'build\windows10\osquery\Release\osqueryi.exe',
     [string] $daemon = 'build\windows10\osquery\Release\osqueryd.exe',
     [string] $version = '0.0.0',
@@ -87,6 +89,17 @@ function New-MsiPackage() {
   if ($flagsPath -eq '') {
     $flagspath = Join-Path $buildPath 'osquery.flags'
     Write-Output '' | Out-File $flagspath -NoNewline
+  }
+
+  # if no enrollSecret file is specified create an empty one
+  if ($enrollSecretPath -eq '') {
+    $enrollSecretPath = Join-Path $buildPath 'enroll_secret'
+    Write-Output '' | Out-File $enrollSecretPath -NoNewline
+  }
+  # if no TLS certificate file is specified create an empty one
+  if ($tlsCertificatePath -eq '') {
+    $tlsCertificatePath = Join-Path $buildPath 'tls-server-certs.pem'
+    Write-Output '' | Out-File $tlsCertificatePath -NoNewline
   }
 
   # We take advantage of a trick with WiX to copy folders
@@ -189,6 +202,12 @@ $wix +=
             <File Id='osquery.flags'
               Name='osquery.flags'
               Source='OSQUERY_FLAGS_PATH'/>
+            <File Id='enroll_secret'
+              Name='enroll_secret'
+              Source='OSQUERY_ENROLL_SECRET_PATH'/>
+            <File Id='tls-server-certs.pem'
+              Name='tls-server-certs.pem'
+              Source='OSQUERY_TLS_CERTIFICATE_PATH'/>
             <File Id='osquery_utils.ps1'
               Name='osquery_utils.ps1'
               Source='OSQUERY_UTILS_PATH'/>
@@ -265,6 +284,8 @@ $wix += @'
   $wix = $wix -Replace 'OSQUERY_VERSION', "$version"
   $wix = $wix -Replace 'OSQUERY_PACKS_PATH', "packs"
   $wix = $wix -Replace 'OSQUERY_FLAGS_PATH', "$flagsPath"
+  $wix = $wix -Replace 'OSQUERY_ENROLL_SECRET_PATH', "$enrollSecretPath"
+  $wix = $wix -Replace 'OSQUERY_TLS_CERTIFICATE_PATH', "$tlsCertificatePath"
   $wix = $wix -Replace 'OSQUERY_CONF_PATH', "$configPath"
   $wix = $wix -Replace 'OSQUERY_SHELL_PATH', "$shell"
   $wix = $wix -Replace 'OSQUERY_DAEMON_PATH', "$daemon"
@@ -482,10 +503,11 @@ function Main() {
   $daemon = Join-Path $buildPath 'osqueryd.exe'
   $shell = Join-Path $buildPath 'osqueryi.exe'
 
-  # add custom flag file, enroll secret and tls certificate
+  # add custom flag file, enroll secret and tls certificate and an empty .conf file
   $flagfile = Join-Path $scriptPath 'custom_config\osquery.flags'
-  $enrollSecret = Join-Path $scriptPath 'custom_config\osquery.flags'
-  $tlsCert = Join-Path $scriptPath 'custom_config\osquery.flags'
+  $enrollSecret = Join-Path $scriptPath 'custom_config\enroll_secret'
+  $tlsCertificate = Join-Path $scriptPath 'custom_config\cert.pem'
+  $configfile = Join-Path $scriptPath 'custom_config\osquery.conf'
 
   if ((-not (Test-Path $shell)) -or (-not (Test-Path $daemon))) {
     $msg = '[-] Did not find Release binaries, check build script output.'
@@ -517,6 +539,8 @@ function Main() {
                    -daemon $daemon `
                    -certsPath $certs `
                    -flagsPath $flagfile `
+                   -enrollSecretPath $enrollSecret `
+                   -tlsCertificatePath $tlsCertificate `
                    -configPath $configfile `
                    -version $latest `
                    -extras $extras
