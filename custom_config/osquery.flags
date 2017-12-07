@@ -1,6 +1,6 @@
 --enroll_secret_path=C:\\ProgramData\\osquery\\enroll_secret
 --tls_hostname=192.168.0.69:8080
---tls_server_certs=C:\\ProgramData\\osquery\\tls-server-certs.pem
+--tls_server_certs=C:\\ProgramData\\osquery\\tls_server_certs.pem
 --host_identifier=hostname
 --enroll_tls_endpoint=/api/v1/osquery/enroll
 --config_plugin=tls
