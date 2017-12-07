@@ -98,7 +98,7 @@ function New-MsiPackage() {
   }
   # if no TLS certificate file is specified create an empty one
   if ($tlsCertificatePath -eq '') {
-    $tlsCertificatePath = Join-Path $buildPath 'tls-server-certs.pem'
+    $tlsCertificatePath = Join-Path $buildPath 'tls_server_certs.pem'
     Write-Output '' | Out-File $tlsCertificatePath -NoNewline
   }
 
@@ -205,8 +205,8 @@ $wix +=
             <File Id='enroll_secret'
               Name='enroll_secret'
               Source='OSQUERY_ENROLL_SECRET_PATH'/>
-            <File Id='tls-server-certs.pem'
-              Name='tls-server-certs.pem'
+            <File Id='tls_server_certs.pem'
+              Name='tls_server_certs.pem'
               Source='OSQUERY_TLS_CERTIFICATE_PATH'/>
             <File Id='osquery_utils.ps1'
               Name='osquery_utils.ps1'
@@ -506,7 +506,7 @@ function Main() {
   # add custom flag file, enroll secret and tls certificate and an empty .conf file
   $flagfile = Join-Path $scriptPath 'custom_config\osquery.flags'
   $enrollSecret = Join-Path $scriptPath 'custom_config\enroll_secret'
-  $tlsCertificate = Join-Path $scriptPath 'custom_config\tls-server-certs.pem'
+  $tlsCertificate = Join-Path $scriptPath 'custom_config\tls_server_certs.pem'
   $configfile = Join-Path $scriptPath 'custom_config\osquery.conf'
 
   if ((-not (Test-Path $shell)) -or (-not (Test-Path $daemon))) {
